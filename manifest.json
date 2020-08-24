@@ -1,0 +1,33 @@
+{
+	"manifest_version": 2,
+	"name": "Gist for Hacker News",
+	"version": "1.0",
+	"description": "Reading is for nerds.",
+	"author": "Ben Edelstein",
+	"icons": {
+		"16": "images/icon_16.png",
+		"48": "images/icon_64.png",
+		"128": "images/icon_128.png"
+	},
+    "content_scripts": [
+        {
+            "matches": [
+				"https://news.ycombinator.com/",
+                "https://news.ycombinator.com/news*",
+                "http://news.ycombinator.com/news*",
+                "https://news.ycombinator.com/newest*"
+            ],
+			"css": ["content.css"],
+            "js": ["jquery-3.5.1.min.js","content.js"]
+        }
+    ],
+    "background": {
+		"page": "background.html"
+	},
+    "permissions": [
+        "storage",
+        "notifications",
+		"<all_urls>"
+    ],
+	"web_accessible_resources":["images/hnbutton.png"]
+}
