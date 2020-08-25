@@ -54,7 +54,7 @@ async function getSummary(articleText, articleTitle) {
         let data = await response.json();
         let summary = data.response;
         console.log(summary);
-        summary = cleanText(summary);
+        // summary = cleanText(summary);
         // chrome.notifications.create('', {
         //     title: 'Your Summary!',
         //     message: articleTitle + '\n' + summary,
