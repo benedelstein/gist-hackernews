@@ -1,5 +1,5 @@
 const PARAGRAPH_WORDCOUNT_THRESHOLD = 6; // min paragraph length in words
-const ARTICLE_LENGTH_THRESHOLD = 2000;
+const ARTICLE_LENGTH_THRESHOLD = 2000; // max article length in characters
 // given a string representing html, parse it into a document object
 function parseDomFromText(htmlText) {
     let domparser = new DOMParser();
@@ -15,7 +15,7 @@ function simplifyDom(doc) {
 
 // extract the text from an article with dom content and title
 function getArticleText(doc, articleTitle) {
-    let articleText = articleTitle + '\n';
+    let articleText = articleTitle + '\n\n';
     // create jquery object for simplified dom
     let $doc = $(doc);
     console.log(typeof($doc));
@@ -41,7 +41,7 @@ function getArticleText(doc, articleTitle) {
             let pText = $(this).text();
             let pWordCount = countWords(pText);
             if (pWordCount > PARAGRAPH_WORDCOUNT_THRESHOLD && !firstPFound) {
-                articleText += pText + '\n';
+                articleText += pText + '\n\n';
                 firstPFound = true;
                 console.log("first p:",pText);
             }
