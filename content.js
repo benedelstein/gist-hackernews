@@ -6,7 +6,9 @@ $(document).ready(function() {
         console.log(linkUrl);
         // filter out HN non-article links
         // TODO: filter out stuff like pdfs
-        if(!linkTitle.startsWith("Launch HN") && !linkTitle.startsWith("Show HN") && !linkTitle.startsWith("Ask HN") && !linkUrl.endsWith(".pdf") && !linkTitle.endsWith('[video]')) {
+        if(!linkTitle.startsWith("Launch HN") && !linkTitle.startsWith("Show HN")
+                && !linkTitle.startsWith("Ask HN") && !linkUrl.endsWith(".pdf")
+                && !linkTitle.endsWith('[video]')) {
             iconSrc = chrome.runtime.getURL("images/hnbutton.png"); // must get url from chrome runtime
             $(this).find("td.title > span.sitebit").after(`<img src="${iconSrc}" class="get-gist">`);
         }
@@ -16,7 +18,7 @@ $(document).ready(function() {
         console.log('gist click');
         event.stopPropagation();
         event.stopImmediatePropagation();
-        $(this).parent().parent().nextAll('.summary').remove();
+        $(this).parent().parent().next().next('.summary').remove();
         $(this).parent().parent().next('tr').after('<tr class="loader-row"><td colspan="2"></td><td><div class="loader"></div></td></tr>');
         let $titleTd = $(this).parent();
         let articleUrl = $titleTd.children("a.storylink").attr('href');
