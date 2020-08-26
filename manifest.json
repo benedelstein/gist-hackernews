@@ -29,5 +29,6 @@
         "notifications",
 		"<all_urls>"
     ],
-	"web_accessible_resources":["images/hnbutton.png"]
+	"web_accessible_resources":["images/hnbutton.png"],
+	"content_security_policy": "script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
 }

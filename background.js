@@ -1,3 +1,31 @@
+// Your web app's Firebase configuration
+var firebaseConfig = {
+apiKey: "AIzaSyDaGfUexg19qSUPkBnO010Xh8a6j01yTYw",
+authDomain: "summarizer-3bca9.firebaseapp.com",
+databaseURL: "https://summarizer-3bca9.firebaseio.com",
+projectId: "summarizer-3bca9",
+storageBucket: "summarizer-3bca9.appspot.com",
+messagingSenderId: "264613843539",
+appId: "1:264613843539:web:363d4bd5c03dfa1973aca6"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+firebase.auth().signInAnonymously().catch(error => {
+    console.log(error);
+});
+
+firebase.auth().onAuthStateChanged(user => {
+    if(user) {
+        // signed in
+        var isAnonymous = user.isAnonymous;
+        var uid = user.uid;
+    } else {
+        // signed out
+        console.log('signed out');
+    }
+})
+
 chrome.runtime.onMessage.addListener(function(request,sender,sendResponse) {
     if (request.message == "query") {
         fetchLink(request.articleUrl)
@@ -44,10 +72,12 @@ async function getSummary(articleText, articleTitle) {
     let baseURL = 'https://us-central1-summarizer-3bca9.cloudfunctions.net/gpt';
     console.log('getting article summary...');
     try {
+        let token = await firebase.auth().currentUser.getIdToken();
         let response = await fetch(baseURL, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
             },
             body: JSON.stringify({text: articleText})
         });
@@ -55,12 +85,6 @@ async function getSummary(articleText, articleTitle) {
         let summary = data.response;
         console.log(summary);
         // summary = cleanText(summary);
-        // chrome.notifications.create('', {
-        //     title: 'Your Summary!',
-        //     message: articleTitle + '\n' + summary,
-        //     iconUrl: 'images/icon_128.png',
-        //     type: 'basic'
-        // });
         return summary;
     } catch(error) {
         console.log(error);
