@@ -40,22 +40,14 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse) {
     }
 });
 
+// fetch the dom for the requested link
 async function fetchLink(url) {
-    // fetch the dom for the requested link
-    try {
-        let response = await fetch(url);
-        let html = await response.text();
-        let doc = parseDomFromText(html);
-        let summary = await handleRequest(doc);
-        console.log(summary);
-        return summary;
-    } catch(error) {
-        chrome.runtime.sendMessage({
-            msg: "error",
-            errorMessage: error
-        });
-        console.log(error);
-    }
+    let response = await fetch(url);
+    let html = await response.text();
+    let doc = parseDomFromText(html);
+    let summary = await handleRequest(doc);
+    console.log(summary);
+    return summary;
 }
 
 async function handleRequest(doc) {
@@ -71,26 +63,21 @@ async function handleRequest(doc) {
 async function getSummary(articleText, articleTitle) {
     let baseURL = 'https://us-central1-summarizer-3bca9.cloudfunctions.net/gpt';
     console.log('getting article summary...');
-    try {
-        let token = await firebase.auth().currentUser.getIdToken();
-        let response = await fetch(baseURL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({text: articleText})
-        });
+    let token = await firebase.auth().currentUser.getIdToken();
+    let response = await fetch(baseURL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({text: articleText})
+    });
+    if (response.ok) {
         let data = await response.json();
         let summary = data.response;
-        console.log(summary);
-        // summary = cleanText(summary);
+        summary = cleanText(summary);
         return summary;
-    } catch(error) {
-        console.log(error);
-        chrome.runtime.sendMessage({
-            msg: "error",
-            errorMessage: error
-        });
+    } else {
+        throw new Error('fetch failed');
     }
 }

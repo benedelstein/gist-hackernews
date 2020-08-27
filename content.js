@@ -38,7 +38,7 @@ $(document).ready(function() {
                     insertSummary(response.rowId, response.summary);
                 } else if (response.error) {
                     console.log(response.error);
-                    insertSummary(response.rowId, "could not generated summary. try again.");
+                    insertSummary(response.rowId, "could not get your summary :( pls try again");
                 }
             }
         );
@@ -49,6 +49,5 @@ function insertSummary(rowId, summary) {
     let summaryHtml = '<tr class="summary"><td colspan="2"></td><td><div class="summary-wrapper"><div class="vl"><p>' + summary + '</p></div></div></td></tr>';
     // let summaryHtml = '<div class="summary">' + summary + '</div>';
     $(`#${rowId}`).next('tr').after(summaryHtml);
-    // $('.loader').remove();
-    $(`#${rowId}`).nextAll('.loader-row').first().remove(); // hide the loader
+    $(`#${rowId}`).nextAll('.loader-row').first().remove(); // remove the loader
 }

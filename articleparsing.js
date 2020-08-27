@@ -58,6 +58,8 @@ function getArticleText(doc, articleTitle) {
                 console.log('paragraph too short!');
             }
         }
+
+        // TODO: add last paragraph of article
     } else {
         console.log('full parse');
         // if not just pull the full paragraph body
@@ -86,12 +88,10 @@ function getArticleText(doc, articleTitle) {
 }
 
 function cleanText(text) {
-    // remove urls
-    // trim to nearest sentence
     // https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)
     // remove characters like &raquo etc
     let punctuationMarks = ['.','?','!'];
-    let lastPunctuation = 0;
+    let lastPunctuation = -1;
     for (var i = 0; i < punctuationMarks.length; i++) {
         let lastOccurrence = text.lastIndexOf(punctuationMarks[i]);
         console.log(lastOccurrence);
@@ -100,7 +100,10 @@ function cleanText(text) {
         }
     }
     console.log(lastPunctuation);
-    text = text.substring(0,lastPunctuation);
+    if (lastPunctuation >= 0 && lastPunctuation < text.length-1) {
+        text = text.substring(0,lastPunctuation+1);
+    }
+    text = text.replace("Objective summary:", "");
     text = text.replace(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi, " ");
     return text;
 }
