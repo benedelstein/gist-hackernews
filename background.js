@@ -44,19 +44,21 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse) {
 async function fetchLink(url) {
     let response = await fetch(url);
     let html = await response.text();
-    let doc = parseDomFromText(html);
-    let summary = await handleRequest(doc);
+    let doc = parseDomFromText(html); // parse raw dom text from fetch
+    let summary = await handleRequest(doc, url);
     console.log(summary);
     return summary;
 }
 
-async function handleRequest(doc) {
+async function handleRequest(doc, url) {
     let article = simplifyDom(doc); // simplify dom with readability.js
     let articleTitle = article.title;
     let articleHtml = article.content;
     let articleDoc = parseDomFromText(articleHtml); // parse simplified dom from text
     let articleText = getArticleText(articleDoc, articleTitle);
     let summary = await getSummary(articleText, articleTitle);
+    // TODO: post summary to firestore
+    writeToFirestore(articleTitle, summary, url);
     return summary;
 }
 
@@ -80,4 +82,19 @@ async function getSummary(articleText, articleTitle) {
     } else {
         throw new Error('fetch failed');
     }
+}
+
+function writeToFirestore(articleTitle, articleSummary, url) {
+    var db = firebase.firestore();
+    db.collection("articles").add({
+    title: articleTitle,
+    summary: articleSummary,
+    url: url
+    })
+    .then(function(docRef) {
+        console.log("Document written with ID: ", docRef.id);
+    })
+    .catch(function(error) {
+        console.error("Error adding document: ", error);
+    });
 }
