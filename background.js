@@ -20,6 +20,30 @@ firebase.auth().onAuthStateChanged(user => {
         // signed in
         var isAnonymous = user.isAnonymous;
         var uid = user.uid;
+        console.log(uid);
+        var db = firebase.firestore();
+        var docRef = db.collection("users").doc(uid);
+        docRef.get().then(function(doc) {
+            if (doc.exists) {
+                console.log("Document data:", doc.data());
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+                // add user to firestore
+                db.collection("users").doc(uid).set({
+                    uid: uid,
+                    summaryCount: 0
+                })
+                .then(function() {
+                    console.log("user firestore created!");
+                })
+                .catch(function(error) {
+                    console.error("Error adding user document: ", error);
+                });
+            }
+        }).catch(function(error) {
+            console.log("Error getting user document:", error);
+        });
     } else {
         // signed out
         console.log('signed out');
@@ -56,13 +80,12 @@ async function handleRequest(doc, url) {
     let articleHtml = article.content;
     let articleDoc = parseDomFromText(articleHtml); // parse simplified dom from text
     let articleText = getArticleText(articleDoc, articleTitle);
-    let summary = await getSummary(articleText, articleTitle);
-    // TODO: post summary to firestore
-    writeToFirestore(articleTitle, summary, url);
+    let summary = await getSummary(articleText, articleTitle,url);
+    // writeToFirestore(articleTitle, summary, url);
     return summary;
 }
 
-async function getSummary(articleText, articleTitle) {
+async function getSummary(articleText, articleTitle, url) {
     let baseURL = 'https://us-central1-summarizer-3bca9.cloudfunctions.net/gpt';
     console.log('getting article summary...');
     let token = await firebase.auth().currentUser.getIdToken();
@@ -72,7 +95,7 @@ async function getSummary(articleText, articleTitle) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
         },
-        body: JSON.stringify({text: articleText})
+        body: JSON.stringify({text: articleText, url: url})
     });
     if (response.ok) {
         let data = await response.json();
@@ -84,15 +107,29 @@ async function getSummary(articleText, articleTitle) {
     }
 }
 
+// write article to firestore and update user's summary count
 function writeToFirestore(articleTitle, articleSummary, url) {
     var db = firebase.firestore();
     db.collection("articles").add({
-    title: articleTitle,
-    summary: articleSummary,
-    url: url
+        title: articleTitle,
+        summary: articleSummary,
+        url: url,
+        createdTime: firebase.firestore.FieldValue.serverTimestamp(),
+        userId: firebase.auth().currentUser.uid
     })
     .then(function(docRef) {
         console.log("Document written with ID: ", docRef.id);
+        db.collection("users").doc(firebase.auth().currentUser.uid).update({
+            // increment user's summary count
+            summaryCount: firebase.firestore.FieldValue.increment(1)
+        })
+        .then(function() {
+            console.log("Document successfully updated!");
+        })
+        .catch(function(error) {
+            // The document probably doesn't exist.
+            console.error("Error updating document: ", error);
+        });
     })
     .catch(function(error) {
         console.error("Error adding document: ", error);

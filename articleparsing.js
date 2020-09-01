@@ -103,6 +103,7 @@ function cleanText(text) {
     if (lastPunctuation >= 0 && lastPunctuation < text.length-1) {
         text = text.substring(0,lastPunctuation+1);
     }
+    text = text.trim();
     text = text.replace("Objective summary:", "");
     text = text.replace(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi, " ");
     return text;
